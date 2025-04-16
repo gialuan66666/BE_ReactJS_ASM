@@ -1,90 +1,74 @@
 const CartModel = require('../models/cartModel');
 
 class CartController {
+  static response(res, status, message, data = {}) {
+    return res.status(status).json({ message, ...data });
+  }
 
-  // Lấy giỏ hàng theo user_id
   static async getByUser(req, res) {
     try {
       const { user_id } = req.params;
-      const cartItems = await CartModel.findAll({ where: { user_id } });
-
-      res.status(200).json({
-        message: 'Lấy giỏ hàng thành công',
-        data: cartItems
-      });
+      const data = await CartModel.findAll({ where: { user_id } });
+      return this.response(res, 200, 'Lấy giỏ hàng thành công', { data });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error("❌ [getByUser] Lỗi:", error);
+      return this.response(res, 500, 'Lỗi server', { error: error.message });
     }
   }
 
-  // Thêm sản phẩm vào giỏ
   static async add(req, res) {
     try {
-      const { user_id, variant_id, quantity } = req.body;
+      const user_id = req.user?.id;
+      const { variant_id, quantity } = req.body;
 
-      // Kiểm tra nếu sản phẩm đã có trong giỏ => cập nhật số lượng
-      const existingItem = await CartModel.findOne({
-        where: { user_id, variant_id }
-      });
+      if (!user_id) return this.response(res, 401, "Token không hợp lệ hoặc thiếu middleware");
+      if (!variant_id) return this.response(res, 400, "Thiếu variant_id");
+      if (!Number.isInteger(quantity) || quantity <= 0)
+        return this.response(res, 400, "Số lượng phải là số nguyên dương");
 
-      if (existingItem) {
-        existingItem.quantity += quantity;
-        await existingItem.save();
-
-        return res.status(200).json({
-          message: 'Cập nhật số lượng giỏ hàng thành công',
-          item: existingItem
-        });
+      const existing = await CartModel.findOne({ where: { user_id, variant_id } });
+      if (existing) {
+        existing.quantity += quantity;
+        await existing.save();
+        return this.response(res, 200, "Cập nhật số lượng giỏ hàng thành công", { item: existing });
       }
 
-      // Nếu chưa có, thêm mới
-      const newItem = await CartModel.create({ user_id, variant_id, quantity });
-
-      res.status(201).json({
-        message: 'Thêm sản phẩm vào giỏ hàng thành công',
-        item: newItem
-      });
+      const item = await CartModel.create({ user_id, variant_id, quantity });
+      return this.response(res, 201, "Thêm sản phẩm vào giỏ hàng thành công", { item });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error("❌ [add] Lỗi:", error);
+      return this.response(res, 500, "Lỗi server", { error: error.message });
     }
   }
 
-  // Cập nhật số lượng trong giỏ hàng
   static async update(req, res) {
     try {
       const { id } = req.params;
       const { quantity } = req.body;
 
       const item = await CartModel.findByPk(id);
-      if (!item) {
-        return res.status(404).json({ message: 'Không tìm thấy mục trong giỏ' });
-      }
+      if (!item) return this.response(res, 404, 'Không tìm thấy mục trong giỏ');
 
       item.quantity = quantity;
       await item.save();
-
-      res.status(200).json({
-        message: 'Cập nhật số lượng thành công',
-        item
-      });
+      return this.response(res, 200, 'Cập nhật số lượng thành công', { item });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error("❌ [update] Lỗi:", error);
+      return this.response(res, 500, 'Lỗi server', { error: error.message });
     }
   }
 
-  // Xoá sản phẩm khỏi giỏ hàng
   static async delete(req, res) {
     try {
       const { id } = req.params;
       const item = await CartModel.findByPk(id);
-      if (!item) {
-        return res.status(404).json({ message: 'Không tìm thấy mục trong giỏ' });
-      }
+      if (!item) return this.response(res, 404, 'Không tìm thấy mục trong giỏ');
 
       await item.destroy();
-      res.status(200).json({ message: 'Xoá sản phẩm khỏi giỏ hàng thành công' });
+      return this.response(res, 200, 'Xoá sản phẩm khỏi giỏ hàng thành công');
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error("❌ [delete] Lỗi:", error);
+      return this.response(res, 500, 'Lỗi server', { error: error.message });
     }
   }
 }
