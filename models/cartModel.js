@@ -21,4 +21,12 @@ const Cart = connection.define('Cart', {
   timestamps: true
 });
 
+const VariantModel = require("./productVariantsModel");
+
+Cart.belongsTo(VariantModel, {
+  foreignKey: "variant_id",
+  as: "variant"
+});
+
+
 module.exports = Cart;

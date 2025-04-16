@@ -1,4 +1,8 @@
 const CartModel = require('../models/cartModel');
+const VariantModel = require('../models/productVariantsModel');
+const ProductModel = require('../models/productsModel');
+const SizeModel = require('../models/sizeModel');
+const ColorModel = require('../models/colorModel');
 
 class CartController {
   static response(res, status, message, data = {}) {
@@ -8,11 +12,57 @@ class CartController {
   static async getByUser(req, res) {
     try {
       const { user_id } = req.params;
-      const data = await CartModel.findAll({ where: { user_id } });
-      return this.response(res, 200, 'Lấy giỏ hàng thành công', { data });
+
+      const cartItems = await CartModel.findAll({
+        where: { user_id },
+        include: [
+          {
+            model: VariantModel,
+            as: 'variant',
+            include: [
+              {
+                model: ProductModel,
+                as: 'product',
+                attributes: ['id', 'name', 'image', 'price', 'sale_price']
+              },
+              {
+                model: SizeModel,
+                as: 'size',
+                attributes: ['id', 'size_label']
+              },
+              {
+                model: ColorModel,
+                as: 'color',
+                attributes: ['id', 'color_name', 'color_code']
+              }
+            ]
+          }
+        ]
+      });
+
+      const mapped = cartItems.map((item) => {
+        return {
+          id: item.id,
+          quantity: item.quantity,
+          productId: item.variant.product.id,
+          name: item.variant.product.name,
+          image: item.variant.product.image,
+          price: item.variant.product.price,
+          sale_price: item.variant.product.sale_price,
+          size: item.variant.size?.size_label,
+          color: item.variant.color?.color_name,
+          color_code: item.variant.color?.color_code,
+          variant_id: item.variant.id
+        };
+      });
+
+      return res.status(200).json({
+        message: 'Lấy giỏ hàng thành công',
+        data: mapped
+      });
     } catch (error) {
       console.error("❌ [getByUser] Lỗi:", error);
-      return this.response(res, 500, 'Lỗi server', { error: error.message });
+      return res.status(500).json({ message: 'Lỗi server', error: error.message });
     }
   }
 

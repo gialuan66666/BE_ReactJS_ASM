@@ -1,7 +1,5 @@
 const connection = require('../database');
 const { DataTypes } = require('sequelize');
-const Size = require('./sizeModel');
-const Color = require('./colorModel');
 
 const ProductVariant = connection.define('ProductVariant', {
   id: {
@@ -30,15 +28,25 @@ const ProductVariant = connection.define('ProductVariant', {
   timestamps: true
 });
 
-ProductVariant.belongsTo(Size, {
-  foreignKey: 'size_id',
-  as: 'size'
+const ProductModel = require("./productsModel");
+const SizeModel = require("./sizeModel");
+const ColorModel = require("./colorModel");
+
+ProductVariant.belongsTo(ProductModel, {
+  foreignKey: "product_id",
+  as: "product"
 });
 
-ProductVariant.belongsTo(Color, {
-  foreignKey: 'color_id',
-  as: 'color'
+ProductVariant.belongsTo(SizeModel, {
+  foreignKey: "size_id",
+  as: "size"
 });
+
+ProductVariant.belongsTo(ColorModel, {
+  foreignKey: "color_id",
+  as: "color"
+});
+
 
 
 module.exports = ProductVariant;
