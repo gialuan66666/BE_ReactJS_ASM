@@ -71,25 +71,26 @@ class CartController {
       const user_id = req.user?.id;
       const { variant_id, quantity } = req.body;
 
-      if (!user_id) return this.response(res, 401, "Token không hợp lệ hoặc thiếu middleware");
-      if (!variant_id) return this.response(res, 400, "Thiếu variant_id");
+      if (!user_id) return res.status(401).json({ message: "Token không hợp lệ hoặc thiếu middleware" });
+      if (!variant_id) return res.status(400).json({ message: "Thiếu variant_id" });
       if (!Number.isInteger(quantity) || quantity <= 0)
-        return this.response(res, 400, "Số lượng phải là số nguyên dương");
+        return res.status(400).json({ message: "Số lượng phải là số nguyên dương" });
 
       const existing = await CartModel.findOne({ where: { user_id, variant_id } });
       if (existing) {
         existing.quantity += quantity;
         await existing.save();
-        return this.response(res, 200, "Cập nhật số lượng giỏ hàng thành công", { item: existing });
+        return res.status(200).json({ message: "Cập nhật số lượng giỏ hàng thành công", item: existing });
       }
 
       const item = await CartModel.create({ user_id, variant_id, quantity });
-      return this.response(res, 201, "Thêm sản phẩm vào giỏ hàng thành công", { item });
+      return res.status(201).json({ message: "Thêm sản phẩm vào giỏ hàng thành công", item });
     } catch (error) {
       console.error("❌ [add] Lỗi:", error);
-      return this.response(res, 500, "Lỗi server", { error: error.message });
+      return res.status(500).json({ message: "Lỗi server", error: error.message });
     }
   }
+
 
   static async update(req, res) {
     try {
