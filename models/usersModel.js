@@ -30,7 +30,7 @@ const User = connection.define('User', {
   },
   avatar: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
   },
 }, {
   tableName: 'users',
