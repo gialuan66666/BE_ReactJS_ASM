@@ -35,18 +35,25 @@ class CategoryController {
         }
     }
 
-    // Tạo danh mục mới
+    // Tạo danh mục mới// Tạo danh mục mới
     static async create(req, res) {
         try {
-            const newCategory = await CategoryModel.create(req.body);
-            res.status(201).json({
-                message: "Tạo danh mục mới thành công",
-                category: newCategory
-            });
+          const { name, status } = req.body;
+      
+          const newCategory = await CategoryModel.create({
+            name,
+            status: status === 'inactive' ? 'inactive' : 'active', 
+          });
+      
+          res.status(201).json({
+            message: "Tạo danh mục mới thành công",
+            category: newCategory,
+          });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+          res.status(500).json({ error: error.message });
         }
-    }
+      }
+
 
     // Cập nhật danh mục
     static async update(req, res) {

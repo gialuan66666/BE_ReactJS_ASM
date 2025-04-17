@@ -18,6 +18,7 @@ const orderRoutes = require('./routes/order.routes');
 const orderDetailRoutes = require('./routes/orderDetail.routes');
 const PaymentRoutes = require('./routes/payment.routes');
 const targetGroupRoutes = require('./routes/targetGroup.routes');
+const dashboardRoutes = require('./routes/dashbroad.routes');
 
 
 app.use(express.json())
@@ -45,7 +46,7 @@ app.use(orderRoutes);
 app.use(orderDetailRoutes);
 app.use(PaymentRoutes);
 app.use(targetGroupRoutes);
-
+app.use('/api', dashboardRoutes);
 app.listen(port, () => {
     console.log('http://localhost:3001');
 })

@@ -11,6 +11,11 @@ const Category = connection.define('Category', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    status: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'active', // Mặc định là 'active'
+      },
 }, {
     tableName: 'categories',
     timestamps: true,

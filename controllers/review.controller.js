@@ -1,20 +1,28 @@
 const ReviewModel = require('../models/reviewModel');
-
+const User = require('../models/usersModel');
+const Product = require('../models/productsModel');
 class ReviewController {
 
   // Lấy tất cả review
   static async get(req, res) {
     try {
-      const reviews = await ReviewModel.findAll();
+      const reviews = await ReviewModel.findAll({
+        include: [
+          { model: User, as: 'user', attributes: ['name'] },
+          { model: Product, as: 'product', attributes: ['name'] }
+        ]
+      });
+  
       res.status(200).json({
         message: 'Lấy danh sách đánh giá thành công',
         data: reviews
       });
     } catch (error) {
+      console.error('Lỗi khi lấy danh sách đánh giá:', error); // Ghi lỗi ra console
       res.status(500).json({ error: error.message });
     }
   }
-
+  
   // Lấy review theo sản phẩm
   static async getByProduct(req, res) {
     try {
@@ -98,7 +106,15 @@ class ReviewController {
       res.status(500).json({ error: error.message });
     }
   }
-  
+  static async getCommentCount(req, res) {
+    try {
+      const count = await ReviewModel.count(); // Đếm số lượng bình luận
+      res.status(200).json({ count });
+    } catch (error) {
+      console.error("Lỗi khi lấy số lượng bình luận:", error);
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 module.exports = ReviewController;

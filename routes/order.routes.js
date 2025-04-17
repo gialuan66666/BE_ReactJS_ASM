@@ -21,4 +21,7 @@ router.put('/order/:id', checkJWT, isAdmin, OrderController.update);
 //Admin xóa đơn hàng
 router.delete('/order/:id', checkJWT, isAdmin, OrderController.delete);
 
+// lấy số lượng 
+router.get('/order/count', OrderController.getOrderCount);
+
 module.exports = router;

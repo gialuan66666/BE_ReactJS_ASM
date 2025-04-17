@@ -13,5 +13,5 @@ router.post('/review/add', checkJWT, ReviewController.add);
 //Chỉ chủ review hoặc admin được sửa/xoá (kiểm tra trong controller)
 router.put('/review/:id', checkJWT, ReviewController.update);
 router.delete('/review/:id', checkJWT, ReviewController.delete);
-
+router.get('/review/count', ReviewController.getCommentCount);
 module.exports = router;

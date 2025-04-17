@@ -1,6 +1,7 @@
 const connection = require('../database');
 const { DataTypes } = require('sequelize');
-
+const User = require ('./usersModel')
+const Address = require ('./addressModel')
 const Order = connection.define('Order', {
   id: {
     type: DataTypes.INTEGER,
@@ -28,5 +29,15 @@ const Order = connection.define('Order', {
   tableName: 'orders',
   timestamps: true
 });
+// Định nghĩa mối quan hệ: một đơn hàng thuộc về một người dùng (user)
+Order.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'userOrder' // Alias của mối quan hệ
+});
 
+// Định nghĩa mối quan hệ: một đơn hàng thuộc về một địa chỉ (address)
+Order.belongsTo(Address, {
+  foreignKey: 'address_id',
+  as: 'orderAddress' // Alias của mối quan hệ
+});
 module.exports = Order;

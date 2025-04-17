@@ -1,6 +1,7 @@
 const connection = require('../database');
 const { DataTypes } = require('sequelize');
 
+
 const Product = connection.define('Product', {
     id: {
         type: DataTypes.INTEGER,
@@ -51,5 +52,7 @@ const Product = connection.define('Product', {
     tableName: 'products',
     timestamps: true
 });
+
+
 
 module.exports = Product;

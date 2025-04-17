@@ -10,7 +10,7 @@ class UserController {
     static async getAllUsers(req, res) {
         try {
             const users = await UserModel.findAll({
-                attributes: { exclude: ['password'] } // Ẩn mật khẩu khi trả về danh sách
+                 attributes: ['id', 'name', 'phone', 'email','role'] // Ẩn mật khẩu khi trả về danh sách
             });
             res.status(200).json({
                 status: 200,
@@ -18,6 +18,7 @@ class UserController {
                 data: users
             });
         } catch (error) {
+            console.error("Lỗi khi lấy danh sách người dùng:", error);
             res.status(500).json({ error: error.message });
         }
     }
@@ -27,7 +28,7 @@ class UserController {
         try {
             const { id } = req.params;
             const user = await UserModel.findByPk(id, {
-                attributes: { exclude: ['password'] }
+                 attributes: ['id', 'name', 'phone', 'email', 'address', 'role']
             });
 
             if (!user) {
@@ -214,7 +215,7 @@ class UserController {
     static async getProfile(req, res) {
         try {
             const user = await UserModel.findByPk(req.user.id, {
-                attributes: { exclude: ['password'] }
+                 attributes: ['id', 'name', 'phone', 'email', 'address', 'role']
             });
 
             if (!user) {
@@ -307,7 +308,47 @@ class UserController {
             res.status(500).json({ message: "Lỗi server", error: error.message });
         }
     }
+    static async updateRole(req, res) {
+        try {
+          const { id } = req.params;
+          const { role } = req.body; // role mới, ví dụ: 'admin' hoặc 'customer'
+    
+          // Kiểm tra giá trị role có hợp lệ không
+          if (role !== 'admin' && role !== 'customer') {
+            return res.status(400).json({ message: "Role không hợp lệ" });
+          }
+    
+          const user = await UserModel.findByPk(id);
+          if (!user) {
+            return res.status(404).json({ message: "Id tài khoản không tồn tại" });
+          }
+    
+          // Cập nhật role
+          await user.update({ role });
+    
+          res.status(200).json({
+            message: "Cập nhật quyền người dùng thành công",
+            user: {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              role: user.role
+            }
+          });
+        } catch (error) {
+          res.status(500).json({ error: error.message });
+        }
+      }
+      static async getUserCount(req, res) {
+        try {
+          const count = await User.count(); // Đếm số lượng người dùng
+          res.status(200).json({ count });
+        } catch (error) {
+          console.error("Lỗi khi lấy số lượng người dùng:", error);
+          res.status(500).json({ error: error.message });
+        }
+      }
+    }
 
-}
 
 module.exports = UserController;

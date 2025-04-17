@@ -25,10 +25,15 @@ const Address = connection.define('Address', {
     },
     note: {
         type: DataTypes.TEXT
-    }
+    },
+    detail: { // <-- Thêm ở đây
+        type: DataTypes.STRING,
+        allowNull: true
+    },
 }, {
     tableName: 'addresses',
     timestamps: true
 });
+
 
 module.exports = Address;
